@@ -11,6 +11,9 @@ RUN npm install -f
 # Copy the rest of the app code
 COPY . .
 
+RUN npm run setup
+
+
 # Optional: expose the backend port (update if different)
 EXPOSE 8888
 
