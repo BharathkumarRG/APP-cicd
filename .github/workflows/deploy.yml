@@ -3,40 +3,57 @@ name: Deploy Full Stack App
 on:
   push:
     branches:
-      - main  # change this to your default branch if needed
+      - main  # Trigger on pushes to the `main` branch. You can change this if needed.
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # The OS runner GitHub Actions will use
 
     steps:
-      - name:  Checkout code
-        uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3  # Pulls your code from GitHub
 
-      - name:  Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2  # Sets up Docker buildx for building multi-platform images
 
-      # - name:  Login to DockerHub (optional, only if pushing to DockerHub)
+      # - name: 🐳 Login to DockerHub (optional, only if pushing to DockerHub)
       #   uses: docker/login-action@v2
       #   with:
-      #     username: ${{ secrets.DOCKER_USERNAME }}
-      #     password: ${{ secrets.DOCKER_PASSWORD }}
+      #     username: ${{ secrets.DOCKER_USERNAME }}  # Your Docker Hub username
+      #     password: ${{ secrets.DOCKER_PASSWORD }}  # Your Docker Hub password or token
 
-      # - name:  Build and push Docker images (optional)
+      # - name: 📥 Build Docker images for frontend and backend
       #   run: |
-      #     docker build -t yourdockeruser/frontend-app ./frontend
-      #     docker build -t yourdockeruser/backend-app ./backend
-      #     # docker push yourdockeruser/frontend-app
-      #     # docker push yourdockeruser/backend-app
+      #     docker build -t yourdockeruser/frontend-app ./frontend  # Build frontend image
+      #     docker build -t yourdockeruser/backend-app ./backend  # Build backend image
 
-      - name:  Deploy via SSH
-        uses: appleboy/ssh-action@v1.0.0
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.0  # SSH into your server to deploy
         with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
+          host: ${{ secrets.SERVER_HOST }}  # Your server's IP or domain
+          username: ${{ secrets.SERVER_USER }}  # Your SSH user (e.g., ubuntu)
+          key: ${{ secrets.SERVER_SSH_KEY }}  # Your private SSH key
           script: |
-            cd /path/to/your/app
+            # Define the path where your app will be on the server
+            APP_DIR="/home/ubuntu/my-app"
+
+            # Clone or navigate to app directory
+            if [ ! -d "$APP_DIR" ]; then
+              git clone https://github.com/BharathkumarRG/APP-cicd.git $APP_DIR  # Replace with your actual repo URL
+            fi
+
+            cd $APP_DIR
+
+            # Pull latest code from main branch
             git pull origin main
+
+            # Install Docker Compose (if it's not installed already)
+            # if ! [ -x "$(command -v docker-compose)" ]; then
+            #   echo 'Docker Compose is not installed. Installing...'
+            #   sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+            #   sudo chmod +x /usr/local/bin/docker-compose
+            # fi
+
+            # Stop and rebuild the containers using Docker Compose
             docker-compose down
             docker-compose up --build -d
