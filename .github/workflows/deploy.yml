@@ -49,8 +49,8 @@ jobs:
 
             docker container prune -f
             docker image prune -a -f
-            docker volume prune -f
-            docker network prune -f
+            # docker volume prune -f
+            # docker network prune -f
 
             # Use docker compose v2 (updated command)
             docker compose down
