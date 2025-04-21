@@ -47,6 +47,11 @@ jobs:
             # Pull latest code from main branch
             git pull origin main
 
+            docker container prune -f
+            docker image prune -a -f
+            docker volume prune -f
+            docker network prune -f
+
             # Use docker compose v2 (updated command)
             docker compose down
             docker compose up --build -d
